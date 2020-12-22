@@ -42,8 +42,10 @@ def main():
             '11': 'nov', '12': 'dez'
             }
 
+    # Lista com todas as datas de início dos alugueis para cada cliente
     todos_ativacao = {}
     for client in alugueis:
+        # Ordena os alugueis de cada cliente pela data de início
         alugueis[client].sort(key=lambda x:x[0])
         for intervalo in alugueis[client]:
             if client not in todos_ativacao:
@@ -51,6 +53,7 @@ def main():
             todos_ativacao[client].append(intervalo[0])
 
     for client in alugueis:
+        # Heap queue dos alugueis correntes
         em_uso = []
         for intervalo in alugueis[client]:
             while intervalo[0] in todos_ativacao[client]:
@@ -87,6 +90,7 @@ def main():
                 if data_inicio.month != 12:
                     data_inicio = data_inicio.replace(day=1,month=data_inicio.month+1)
 
+    # Impressão dos resultados
     mes_ref = sys.argv[1]
     for client in billings:
         print('Cliente %s: $%.2f' %(client, billings[client][mes_ref]))
