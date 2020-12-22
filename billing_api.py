@@ -4,6 +4,9 @@ import datetime
 from calendar import monthrange
 import heapq
 
+# 2,2020-04-04,2020-05-23
+# 2,2020-11-09,2020-12-15
+
 alugueis = {}
 billings = {}
 meses = {'1': 'jan', '2': 'fev', 
@@ -27,16 +30,21 @@ with open(sys.argv[2]) as csv_file:
         else:
             alugueis[client].append(intervalo)
 
+    todos_ativacao = {}
     for client in alugueis:
         alugueis[client].sort(key=lambda x:x[0])
+        for intervalo in alugueis[client]:
+            if client not in todos_ativacao:
+                todos_ativacao[client] = []
+            todos_ativacao[client].append(intervalo[0])
 
     for client in alugueis:
         em_uso = []
-        # for intervalo in alugueis[client]:
-        #     heapq.heappush(em_uso, intervalo[1])
         for intervalo in alugueis[client]:
-            heapq.heappush(em_uso, intervalo[1])
-            if intervalo[0] >= em_uso[0]:
+            while intervalo[0] in todos_ativacao[client]:
+                todos_ativacao[client].remove(intervalo[0])
+                heapq.heappush(em_uso, intervalo[1])
+            while intervalo[0] >= em_uso[0]:
                 heapq.heappop(em_uso)
             num_meses = intervalo[1].month - intervalo[0].month
             data_inicio = intervalo[0]
@@ -63,7 +71,9 @@ with open(sys.argv[2]) as csv_file:
                 billings[client][mes_billing] += valor_cobrado
                 if data_inicio.month != 12:
                     data_inicio = data_inicio.replace(day=1,month=data_inicio.month+1)
-
+    mes_ref = sys.argv[1]
+    for client in billings:
+        print('Cliente %s: $%.2f' %(client, billings[client][mes_ref]))
     breakpoint()
 
     # mes_ref = sys.argv[1]
