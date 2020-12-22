@@ -4,31 +4,43 @@ import datetime
 from calendar import monthrange
 import heapq
 
-# 2,2020-04-04,2020-05-23
-# 2,2020-11-09,2020-12-15
+def leitura_arquivo(caminho_arquivo):
+    '''
+        Realiza a leitura do arquivo .csv com os registros de faturamento
 
-alugueis = {}
-billings = {}
-meses = {'1': 'jan', '2': 'fev', 
-         '3': 'mar', '4': 'abr',
-         '5': 'mai', '6': 'jun',
-         '7': 'jul', '8': 'ago',
-         '9': 'set', '10': 'out',
-         '11': 'nov', '12': 'dez' 
-        }
+        Args:
+            caminho_arquivo(str): Caminho para o arquivo ou apenas o nome caso esteja na mesma pasta
 
-with open(sys.argv[2]) as csv_file:
+        Return:
+            alugueis(dict): Dicionário com os dados para cada cliente
+    '''
 
-    csv_reader = csv.DictReader(csv_file, delimiter=',')
-    for row in csv_reader:
-        client = row['CustomerId']
-        data_inicio = datetime.datetime.strptime(row['ActivatedAt'], '%Y-%m-%d').date()
-        data_fim = datetime.datetime.strptime(row['DeactivatedAt'], '%Y-%m-%d').date()
-        intervalo = [data_inicio, data_fim]
-        if client not in alugueis:
-            alugueis[client] = [intervalo]
-        else:
-            alugueis[client].append(intervalo)
+    with open(caminho_arquivo) as csv_file:
+        alugueis = {}
+        csv_reader = csv.DictReader(csv_file, delimiter=',')
+        for row in csv_reader:
+            client = row['CustomerId']
+            data_inicio = datetime.datetime.strptime(row['ActivatedAt'], '%Y-%m-%d').date()
+            data_fim = datetime.datetime.strptime(row['DeactivatedAt'], '%Y-%m-%d').date()
+            intervalo = [data_inicio, data_fim]
+            if client not in alugueis:
+                alugueis[client] = [intervalo]
+            else:
+                alugueis[client].append(intervalo)
+    return alugueis
+
+def main():
+
+    #Leitura do Arquivo
+    alugueis = leitura_arquivo(sys.argv[2])
+    billings = {}
+    meses = {'1': 'jan', '2': 'fev',
+            '3': 'mar', '4': 'abr',
+            '5': 'mai', '6': 'jun',
+            '7': 'jul', '8': 'ago',
+            '9': 'set', '10': 'out',
+            '11': 'nov', '12': 'dez'
+            }
 
     todos_ativacao = {}
     for client in alugueis:
@@ -49,6 +61,7 @@ with open(sys.argv[2]) as csv_file:
             num_meses = intervalo[1].month - intervalo[0].month
             data_inicio = intervalo[0]
             data_fim = intervalo[1]
+
             for _ in range(num_meses+1):
                 if client not in billings:
                     billings[client] = dict.fromkeys(meses.values(),0)
@@ -61,6 +74,7 @@ with open(sys.argv[2]) as csv_file:
                     dias_no_mes = monthrange(ano_billing, mes_billing)[1]
                     num_of_days = dias_no_mes - data_inicio.day + 1
                     mes_billing = meses[str(mes_billing)]
+
                 num_of_printers = len(em_uso)
                 if num_of_printers <= 2:
                     valor_cobrado = num_of_days*30/dias_no_mes
@@ -68,25 +82,14 @@ with open(sys.argv[2]) as csv_file:
                     valor_cobrado = num_of_days*25/dias_no_mes
                 else:
                     valor_cobrado = num_of_days*28/dias_no_mes
+
                 billings[client][mes_billing] += valor_cobrado
                 if data_inicio.month != 12:
                     data_inicio = data_inicio.replace(day=1,month=data_inicio.month+1)
+
     mes_ref = sys.argv[1]
     for client in billings:
         print('Cliente %s: $%.2f' %(client, billings[client][mes_ref]))
-    breakpoint()
 
-    # mes_ref = sys.argv[1]
-    # for client in alugueis:
-    #     if num_of_printers[client] <= 2:
-            
-    #     elif num_of_printers[client] >= 6:
-
-
-    #     else:
-    #     billings[client][mes_ref]
-    # print(billings)
-            
-
-
-
+if __name__ == '__main__':
+    main()
