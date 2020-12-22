@@ -30,8 +30,6 @@ with open(sys.argv[2]) as csv_file:
     for client in alugueis:
         alugueis[client].sort(key=lambda x:x[0])
 
-
-    print(alugueis)
     for client in alugueis:
         em_uso = []
         # for intervalo in alugueis[client]:
