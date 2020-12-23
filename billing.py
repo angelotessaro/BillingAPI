@@ -29,6 +29,32 @@ def leitura_arquivo(caminho_arquivo):
                 alugueis[client].append(intervalo)
     return alugueis
 
+def remove_overlap(intervals):
+    for i in intervals:
+        for j in intervals:
+            if i != j:
+                if i[0] == j[0] and i[1] > j[1]:
+                    right_interval = [j[1], i[1]]
+                    intervals.remove(i)
+                    i = j
+                    intervals.append(i)
+                    intervals.append(right_interval)
+                elif i[0] < j[0] and i[1] == j[1]:
+                    left_interval = [i[0], j[0]]
+                    intervals.remove(i)
+                    i = j
+                    intervals.append(i)
+                    intervals.append(left_interval)
+                elif i[0] < j[0] and i[1] > j[1]:
+                    left_interval = [i[0], j[0]]
+                    right_interval = [j[1], i[1]]
+                    intervals.remove(i)
+                    i = j
+                    intervals.append(i)
+                    intervals.append(left_interval)
+                    intervals.append(right_interval)
+    return intervals
+
 def main():
 
     #Leitura do Arquivo
@@ -41,6 +67,9 @@ def main():
             '9': 'set', '10': 'out',
             '11': 'nov', '12': 'dez'
             }
+
+    for client in alugueis:
+        alugueis[client] = remove_overlap(alugueis[client])
 
     # Lista com todas as datas de início dos alugueis para cada cliente
     todos_ativacao = {}
@@ -69,6 +98,7 @@ def main():
                 if client not in billings:
                     billings[client] = dict.fromkeys(meses.values(),0)
                 if data_fim.month == data_inicio.month:
+                    dias_no_mes = monthrange(ano_billing, data_fim.month)[1]
                     mes_billing = meses[str(data_fim.month)]
                     num_of_days = (data_fim - data_inicio).days
                 else:
