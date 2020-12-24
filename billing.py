@@ -30,6 +30,29 @@ def leitura_arquivo(caminho_arquivo):
     return alugueis
 
 def remove_overlap(intervals):
+    '''
+        Quebra intervalos que contêm outros intervalos a fim de possibilitar a contagem
+        de alugueis ativos em cada intervalo.
+ 
+        Exemplo:
+ 
+            (2020-09-01, 2020-10-15) --> intervalo 1
+            (2020-09-05, 2020-10-06) --> intervalo 2
+
+            O intervalo 1 contém o intervalo 2, então ele é quebrado em 3 intervalos:
+
+            (2020-09-01, 2020-09-05)
+            (2020-09-05, 2020-10-06)
+            (2020-10-06, 2020-10-15)
+
+
+        Args:
+            intervals(dict): Intervalos de aluguel para um cliente
+
+        Return:
+            intervals(dict): Intervalos de aluguel para um cliente corrigido
+    '''
+
     for i in intervals:
         for j in intervals:
             if i != j:
@@ -39,12 +62,14 @@ def remove_overlap(intervals):
                     i = j
                     intervals.append(i)
                     intervals.append(right_interval)
+                    break
                 elif i[0] < j[0] and i[1] == j[1]:
                     left_interval = [i[0], j[0]]
                     intervals.remove(i)
                     i = j
                     intervals.append(i)
                     intervals.append(left_interval)
+                    break
                 elif i[0] < j[0] and i[1] > j[1]:
                     left_interval = [i[0], j[0]]
                     right_interval = [j[1], i[1]]
@@ -53,6 +78,7 @@ def remove_overlap(intervals):
                     intervals.append(i)
                     intervals.append(left_interval)
                     intervals.append(right_interval)
+                    break
     return intervals
 
 def main():
